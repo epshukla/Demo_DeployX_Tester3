@@ -1,0 +1,13 @@
+Welcome to DeployX Tester3
+==========================
+
+This file was uploaded on the DeployX project's Documents tab.
+
+Path it took:
+  1. Browser -> Supabase Storage (private bucket, presigned upload URL)
+  2. SHA-256 recorded; the runner downloads it and verifies size + checksum
+  3. Runner -> its S3-compatible object store (RustFS): versioned bucket,
+     erasure-coded across 4 drives, anonymous GetObject only
+  4. Visitor -> Cloudflare tunnel -> nginx proxy (/files/*) -> object store
+
+Re-upload this file and the old version is kept (versioning).

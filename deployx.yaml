@@ -1,0 +1,46 @@
+name: storage-and-virtualization
+tasks:
+  test:
+    steps:
+      - name: Install dependencies
+        command: npm ci
+      - name: Run tests
+        command: npm test
+
+  build:
+    depends_on: [test]
+    steps:
+      - name: Build Docker image
+        command: docker build -t demo-storage:${{ git.short_sha }} .
+    deploy:
+      # Cloud service brokerage: the runner picks the first target it can use
+      driver: auto
+      broker:
+        prefer: [docker_local, railway, fly_io]
+      strategy: blue_green
+      port: 3000
+      image: demo-storage:${{ git.short_sha }}
+      health_check:
+        path: /health
+        interval_seconds: 10
+        timeout_seconds: 5
+        retries: 3
+        start_period_seconds: 15
+      # Virtualized compute: cgroup limits on each app container
+      resources:
+        cpus: 0.5
+        memory_mb: 256
+        pids: 128
+      # Block storage: survives redeploys and blue/green switches
+      volumes:
+        - name: appdata
+          path: /data
+      # Scan the image before it goes live; HIGH/CRITICAL findings block the deploy
+      security_scan:
+        severity: [HIGH, CRITICAL]
+        fail_on_findings: true
+      env:
+        DEPLOY_DRIVER: auto
+        DATA_DIR: /data
+        # Documents (uploaded on the project's Documents tab) the page links to
+        DOCUMENT_PATHS: welcome.txt,cc-notes.pdf,images/architecture.png

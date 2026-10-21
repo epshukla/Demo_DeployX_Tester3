@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeployX Demo</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container nav-content">
+      <div class="logo">
+        <span class="logo-icon">&#9670;</span> DeployX
+      </div>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#storage">Storage</a>
+        <a href="#status">Status</a>
+        <a href="#deployments">Deployments</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero">
+    <div class="container">
+      <div class="hero-badge">Deployed with DeployX CI/CD &middot; Storage &amp; Virtualization</div>
+      <h1>Deployed For CC subject</h1>
+      <p class="hero-subtitle">
+        This website was built, tested, and deployed automatically through a
+        DeployX pipeline — from git push to live in seconds. Its documents come
+        from an S3 object store, its data lives on a persistent volume, and it
+        runs inside CPU and memory limits.
+      </p>
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-value" id="uptime">--</span>
+          <span class="stat-label">Uptime</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="version">--</span>
+          <span class="stat-label">Version</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="env">--</span>
+          <span class="stat-label">Environment</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value status-dot" id="health">&#9679;</span>
+          <span class="stat-label">Health</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Features Section -->
+  <section id="features" class="features">
+    <div class="container">
+      <h2>Platform Capabilities</h2>
+      <div class="cards">
+        <div class="card">
+          <div class="card-icon">&#9881;</div>
+          <h3>DAG Pipeline Engine</h3>
+          <p>Define pipelines in YAML. Tasks resolve dependencies automatically using topological sort (Kahn's algorithm). Parallel execution within groups.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">&#9889;</div>
+          <h3>3 Deployment Strategies</h3>
+          <p>Blue-Green for instant cutover. Canary for gradual rollout (10% &rarr; 25% &rarr; 50% &rarr; 100%). Rolling for zero-downtime updates.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">&#10084;</div>
+          <h3>Self-Healing</h3>
+          <p>Health probes every 15 seconds. Sliding window tracks 10 samples. Automatic restart with exponential backoff. Auto-rollback after 3 failures.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">&#128274;</div>
+          <h3>Security First</h3>
+          <p>AES-256-GCM encrypted secrets. HMAC-SHA256 webhook verification. 84 Row-Level Security policies. GitHub OAuth with PKCE.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">&#128640;</div>
+          <h3>Pull-Based Runners</h3>
+          <p>Self-hosted runners poll for jobs — no inbound ports needed. Works behind NAT/firewalls. Multi-profile support for multiple orgs per machine.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">&#128200;</div>
+          <h3>Real-Time Dashboard</h3>
+          <p>WebSocket-powered live updates. See pipeline progress, deployment status, and health metrics as they happen. No page refresh needed.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Storage & Virtualization Section -->
+  <section id="storage" class="storage-section">
+    <div class="container">
+      <h2>Storage &amp; Virtualization</h2>
+      <p class="section-sub">Live from this container &mdash; what DeployX gave it at deploy time.</p>
+
+      <div class="storage-grid">
+        <!-- Documents (object storage) -->
+        <article class="panel">
+          <header class="panel-head">
+            <span class="panel-icon" aria-hidden="true">&#128193;</span>
+            <div>
+              <h3>Documents</h3>
+              <p class="panel-sub">Object storage &middot; served at <code>/files/</code></p>
+            </div>
+          </header>
+          <ul class="doc-list" id="doc-list">
+            <li class="muted">Checking documents&hellip;</li>
+          </ul>
+          <form class="inline-form" id="doc-open" autocomplete="off">
+            <label class="sr-only" for="doc-path">Open a document path</label>
+            <span class="prefix">/files/</span>
+            <input id="doc-path" name="path" placeholder="guides/setup.pdf" maxlength="200">
+            <button type="submit">Open</button>
+          </form>
+          <p class="panel-note">Uploaded on the DeployX project's Documents tab, copied by the runner into a
+            versioned, erasure-coded S3 store (RustFS), and served by the project's proxy.</p>
+        </article>
+
+        <!-- Persistent volume -->
+        <article class="panel">
+          <header class="panel-head">
+            <span class="panel-icon" aria-hidden="true">&#128190;</span>
+            <div>
+              <h3>Persistent volume</h3>
+              <p class="panel-sub">Block storage &middot; mounted at <code id="vol-path">/data</code></p>
+            </div>
+          </header>
+          <div class="kv">
+            <div><span>Containers served</span><strong id="vol-boots">--</strong></div>
+            <div><span>Page visits</span><strong id="vol-visits">--</strong></div>
+            <div><span>Data since</span><strong id="vol-since">--</strong></div>
+            <div><span>Volume</span><strong id="vol-state">--</strong></div>
+          </div>
+          <h4 class="mini-head">Container history (survives redeploys)</h4>
+          <ol class="boot-list" id="boot-list"><li class="muted">--</li></ol>
+          <h4 class="mini-head">Guestbook</h4>
+          <form class="note-form" id="note-form" autocomplete="off">
+            <label class="sr-only" for="note-name">Name</label>
+            <input id="note-name" name="name" placeholder="Name" maxlength="40">
+            <label class="sr-only" for="note-text">Message</label>
+            <input id="note-text" name="text" placeholder="Leave a note &mdash; redeploy and it's still here" maxlength="280" required>
+            <button type="submit">Add</button>
+          </form>
+          <p class="form-error" id="note-error" role="alert"></p>
+          <ul class="note-list" id="note-list"></ul>
+        </article>
+
+        <!-- Resource limits -->
+        <article class="panel">
+          <header class="panel-head">
+            <span class="panel-icon" aria-hidden="true">&#9881;</span>
+            <div>
+              <h3>Resource limits</h3>
+              <p class="panel-sub">Virtualized CPU &amp; memory &middot; cgroup <span id="cg-version">--</span></p>
+            </div>
+          </header>
+          <div class="meter-block">
+            <div class="meter-label"><span>CPU</span><strong id="lim-cpu">--</strong></div>
+            <p class="meter-note" id="lim-cpu-note">of <span id="host-cpus">--</span> host cores</p>
+          </div>
+          <div class="meter-block">
+            <div class="meter-label"><span>Memory</span><strong id="lim-mem">--</strong></div>
+            <div class="meter" role="meter" aria-label="Memory used" aria-valuemin="0" aria-valuemax="100" id="mem-meter">
+              <div class="meter-fill" id="mem-fill"></div>
+            </div>
+            <p class="meter-note"><span id="mem-used">--</span> used &middot; host has <span id="host-mem">--</span></p>
+          </div>
+          <div class="meter-block">
+            <div class="meter-label"><span>Processes</span><strong id="lim-pids">--</strong></div>
+          </div>
+          <p class="panel-note">Set with <code>deploy.resources</code>; Docker turns them into cgroup limits the container cannot exceed.</p>
+        </article>
+
+        <!-- Deploy target + security -->
+        <article class="panel">
+          <header class="panel-head">
+            <span class="panel-icon" aria-hidden="true">&#128737;</span>
+            <div>
+              <h3>Placement &amp; security</h3>
+              <p class="panel-sub">How this build got here</p>
+            </div>
+          </header>
+          <div class="kv">
+            <div><span>Deploy driver</span><strong id="dep-driver">--</strong></div>
+            <div><span>Picked target</span><strong>docker_local</strong></div>
+            <div><span>Container</span><strong id="dep-container">--</strong></div>
+            <div><span>Image scan</span><strong class="ok">Trivy &middot; passed</strong></div>
+          </div>
+          <p class="panel-note"><code>driver: auto</code> lets the runner broker the target: the first of
+            docker_local, Railway, Fly.io it can use. Before deploying, the image was scanned with Trivy for
+            HIGH/CRITICAL vulnerabilities; a failing scan blocks the deploy.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Status Section -->
+  <section id="status" class="status-section">
+    <div class="container">
+      <h2>Live Server Status</h2>
+      <div class="status-grid" id="status-grid">
+        <div class="status-item">
+          <span class="status-key">Application</span>
+          <span class="status-val" id="s-name">--</span>
+        </div>
+        <div class="status-item">
+          <span class="status-key">Version</span>
+          <span class="status-val" id="s-version">--</span>
+        </div>
+        <div class="status-item">
+          <span class="status-key">Status</span>
+          <span class="status-val healthy" id="s-status">--</span>
+        </div>
+        <div class="status-item">
+          <span class="status-key">Uptime</span>
+          <span class="status-val" id="s-uptime">--</span>
+        </div>
+        <div class="status-item">
+          <span class="status-key">Node.js</span>
+          <span class="status-val" id="s-node">--</span>
+        </div>
+        <div class="status-item">
+          <span class="status-key">Platform</span>
+          <span class="status-val" id="s-platform">--</span>
+        </div>
+        <div class="status-item">
+          <span class="status-key">Container</span>
+          <span class="status-val" id="s-container">--</span>
+        </div>
+        <div class="status-item">
+          <span class="status-key">Memory</span>
+          <span class="status-val" id="s-memory">--</span>
+        </div>
+        <div class="status-item">
+          <span class="status-key">Last Check</span>
+          <span class="status-val" id="s-time">--</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Deployments Section -->
+  <section id="deployments" class="deployments-section">
+    <div class="container">
+      <h2>Deployment History</h2>
+      <div class="table-wrap">
+        <table class="deploy-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Version</th>
+              <th>Strategy</th>
+              <th>Status</th>
+              <th>Deployed At</th>
+            </tr>
+          </thead>
+          <tbody id="deploy-tbody">
+            <tr><td colspan="5" class="loading">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>Built with DeployX &mdash; Microservice CI/CD Platform</p>
+      <p class="footer-sub">Object storage &middot; persistent volumes &middot; resource limits &middot; brokered placement &middot; image scanning</p>
+    </div>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>

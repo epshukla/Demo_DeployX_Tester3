@@ -1,0 +1,14 @@
+{
+  "name": "deployx-demo-storage",
+  "version": "3.0.0",
+  "description": "DeployX Tester3 — the Tester2 website plus document storage, a persistent volume and resource limits",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node test.js"
+  },
+  "dependencies": {
+    "express": "^4.22.3"
+  }
+}
